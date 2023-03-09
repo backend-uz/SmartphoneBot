@@ -1,8 +1,8 @@
-from tinydb import TinyDB
+from tinydb import TinyDB, Query
 
 db = TinyDB('db.json')
 
 tables = ['apple', 'vivo', 'samsung', 'xiaomi', 'huawei']
 
-table1 = db.table(tables[1])
-print(table1.all()[0])
+table1 = db.table('apple')
+print(table1.get(doc_id = 4))
