@@ -1,9 +1,15 @@
-import json
+from tinydb import TinyDB, Query
 
 class DB:
     def __init__(self,path):
-        self.path = path
+        self.db = TinyDB(path)
 
+    def get_tables(self):
+        """
+        To get the list of all the tables in the database
+        """
+        return list(self.db.tables())
+        
     def getPhone(self,brand,idx):
         """
         Return phone data by brand
@@ -12,11 +18,18 @@ class DB:
         return:
             dict
         """
-        pass
+        table = self.db.table(brand)
+        return table.get(doc_id=idx)
 
-    def get_phone_list(self,brend):
+    def get_phone_list(self,brand):
         """
         Return phone list
         """
-        pass
+        table = self.db.table(brand)
+        return table.all()
 
+        
+
+# db = DB('db.json')
+# tables = db.get_tables()
+# print(db.get_phone_list(tables[0]))
