@@ -50,10 +50,9 @@ def get_product(update: Update, context: CallbackContext) -> None:
     chat_id = query.message.chat.id
     data = query.data
     brend = data.split('_')[-1]
+    doc_id = 1
+    phone = db.getPhone(brend, doc_id)
 
-    brend_data = db.get_phone_list(brend)
-    doc_id = 0
-    phone = brend_data[doc_id]
     price = phone['price']
     ram = phone['RAM']
     memory = phone['memory']
