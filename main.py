@@ -1,4 +1,4 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 import os
 from db import DB
@@ -52,7 +52,8 @@ def get_product(update: Update, context: CallbackContext) -> None:
     brend = data.split('_')[-1]
 
     brend_data = db.get_phone_list(brend)
-    phone = brend_data[0]
+    doc_id = 0
+    phone = brend_data[doc_id]
     price = phone['price']
     ram = phone['RAM']
     memory = phone['memory']
@@ -61,8 +62,8 @@ def get_product(update: Update, context: CallbackContext) -> None:
     img = phone['img_url']
     text = f"📲{name}\n\n🎨{color}\n💾{ram}/{memory}\n💰{price}\n\n@telefonBozor"
 
-    btn1 = InlineKeyboardButton(text="⬅️", callback_data='next_left')
-    btn2 = InlineKeyboardButton(text="➡️", callback_data='next_right')
+    btn1 = InlineKeyboardButton(text="⬅️", callback_data=f'nextleft_{brend}_{doc_id}')
+    btn2 = InlineKeyboardButton(text="➡️", callback_data=f'nextright_{brend}_{doc_id}')
     btn3 = InlineKeyboardButton(text="Add Card", callback_data='add_card')
     
     keyboard = InlineKeyboardMarkup([
@@ -74,12 +75,34 @@ def get_product(update: Update, context: CallbackContext) -> None:
 def next_product(update, context):
     query = update.callback_query
 
-    print(query.data)
+    data = query.data.split('_')
+    print(data)
+    query_data, brend, doc_id = data
+    doc_id = int(doc_id) + 1
+
+    phone = db.getPhone(brend, doc_id)
+    price = phone['price']
+    ram = phone['RAM']
+    memory = phone['memory']
+    name = phone['name']
+    color = phone['color']
+    img = phone['img_url']
+    text = f"📲{name}\n\n🎨{color}\n💾{ram}/{memory}\n💰{price}\n\n@telefonBozor"
+
+    btn1 = InlineKeyboardButton(text="⬅️", callback_data=f'nextleft_{brend}_{doc_id}')
+    btn2 = InlineKeyboardButton(text="➡️", callback_data=f'nextright_{brend}_{doc_id}')
+    btn3 = InlineKeyboardButton(text="Add Card", callback_data='add_card')
+    
+    keyboard = InlineKeyboardMarkup([
+        [btn1, btn3, btn2]
+    ])
+    query.message.edit_media(media=InputMediaPhoto(media=img, caption=text), reply_markup=keyboard)
+    query.answer('Done!')
+
     query.answer("Done")
 
 def add_card(update, context):
     query = update.callback_query
-    print(query.data)
     query.answer("Done")
 
 updater = Updater(token=TOKEN)
