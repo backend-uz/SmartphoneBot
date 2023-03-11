@@ -54,16 +54,33 @@ def get_product(update: Update, context: CallbackContext) -> None:
     brend_data = db.get_phone_list(brend)
     phone = brend_data[0]
     price = phone['price']
-    ram = phone['ram']
+    ram = phone['RAM']
     memory = phone['memory']
-    name = phone['brend']
+    name = phone['name']
     color = phone['color']
     img = phone['img_url']
+    text = f"📲{name}\n\n🎨{color}\n💾{ram}/{memory}\n💰{price}\n\n@telefonBozor"
 
-    text = f"📲{name}\n\n🎨{color}\n💾{ram}/{memory}GB\n💰{price}\n\n@telefonBozor"
-    print(chat_id)
-    bot.sendPhoto(chat_id, photo=img, caption=text)
+    btn1 = InlineKeyboardButton(text="⬅️", callback_data='next_left')
+    btn2 = InlineKeyboardButton(text="➡️", callback_data='next_right')
+    btn3 = InlineKeyboardButton(text="Add Card", callback_data='add_card')
+    
+    keyboard = InlineKeyboardMarkup([
+        [btn1, btn3, btn2]
+    ])
+    query.message.reply_photo(photo=img, caption=text, reply_markup=keyboard)
     query.answer('Done!')
+
+def next_product(update, context):
+    query = update.callback_query
+
+    print(query.data)
+    query.answer("Done")
+
+def add_card(update, context):
+    query = update.callback_query
+    print(query.data)
+    query.answer("Done")
 
 updater = Updater(token=TOKEN)
 dp = updater.dispatcher
@@ -71,5 +88,7 @@ dp.add_handler(CommandHandler("start", start))
 dp.add_handler(CallbackQueryHandler(view_products, pattern="view_product_data"))
 dp.add_handler(CallbackQueryHandler(menu, pattern="bosh_menu"))
 dp.add_handler(CallbackQueryHandler(get_product, pattern="brend"))
+dp.add_handler(CallbackQueryHandler(next_product, pattern="next"))
+dp.add_handler(CallbackQueryHandler(add_card, pattern="add_card"))
 updater.start_polling()
 updater.idle()
