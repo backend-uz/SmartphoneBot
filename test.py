@@ -1,8 +1,14 @@
 from tinydb import TinyDB, Query
+from cartdb import Cart
 
-db = TinyDB('db.json')
+cart = Cart('cartdb.json')
 
-tables = ['apple', 'vivo', 'samsung', 'xiaomi', 'huawei']
+# data = {
+#     'brand': 'samsung',
+#     'doc_id': 1,
+#     'chat_id': 123
+# }
 
-table1 = db.table('apple')
-print(table1.get(doc_id = 4))
+# cart.add("samsung", 3, 234)
+# print(cart.get_cart(234))
+cart.remove(234)
