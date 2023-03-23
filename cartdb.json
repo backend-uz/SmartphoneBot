@@ -1,0 +1,54 @@
+{
+    "cart": {
+        "1": {
+            "brand": "Oppo",
+            "doc_id": "3",
+            "chat_id": 1380674728
+        },
+        "2": {
+            "brand": "Nokia",
+            "doc_id": "8",
+            "chat_id": 1380674728
+        },
+        "3": {
+            "brand": "Nokia",
+            "doc_id": "8",
+            "chat_id": 1380674728
+        },
+        "4": {
+            "brand": "Apple",
+            "doc_id": "1",
+            "chat_id": 2007510369
+        },
+        "5": {
+            "brand": "Nokia",
+            "doc_id": "10",
+            "chat_id": 2106134979
+        },
+        "6": {
+            "brand": "Huawei",
+            "doc_id": "11",
+            "chat_id": 1432402481
+        },
+        "7": {
+            "brand": "Huawei",
+            "doc_id": "10",
+            "chat_id": 2007510369
+        },
+        "9": {
+            "brand": "Huawei",
+            "doc_id": "2",
+            "chat_id": 996172963
+        },
+        "10": {
+            "brand": "Vivo",
+            "doc_id": "27",
+            "chat_id": 996172963
+        },
+        "13": {
+            "brand": "Nokia",
+            "doc_id": "2",
+            "chat_id": 996172963
+        }
+    }
+}

@@ -2,15 +2,16 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMe
 from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters, CallbackQueryHandler
 import os
 from db import DB
+from cartdb import Cart
 TOKEN=os.environ.get("TOKEN")
-
+cart = Cart('cartdb.json')
 db = DB('db.json')
 
 def start(update: Update, context: CallbackContext) -> None:
     bot = context.bot
     chat_id = update.message.chat.id
     btn1 = InlineKeyboardButton(text='🛍 View Products', callback_data="view_product_data")
-    btn2 = InlineKeyboardButton(text='📦 View Cart', callback_data="viec_cart_data")
+    btn2 = InlineKeyboardButton(text='📦 View Cart', callback_data="view_cart_data")
     btn3 = InlineKeyboardButton(text='📞 Contact Us', callback_data="contact_us_data")
     btn4 = InlineKeyboardButton(text='📝 About Us', callback_data="about_us_data")
     keyboard = InlineKeyboardMarkup([[btn1, btn2], [btn3, btn4]])
@@ -20,7 +21,7 @@ def menu(update: Update, context: CallbackContext) -> None:
     query = update.callback_query
 
     btn1 = InlineKeyboardButton(text='🛍 View Products', callback_data="view_product_data")
-    btn2 = InlineKeyboardButton(text='📦 View Cart', callback_data="viec_cart_data")
+    btn2 = InlineKeyboardButton(text='📦 View Cart', callback_data="view_cart_data")
     btn3 = InlineKeyboardButton(text='📞 Contact Us', callback_data="contact_us_data")
     btn4 = InlineKeyboardButton(text='📝 About Us', callback_data="about_us_data")
     keyboard = InlineKeyboardMarkup([[btn1, btn2], [btn3, btn4]])
@@ -49,9 +50,9 @@ def get_product(update: Update, context: CallbackContext) -> None:
 
     chat_id = query.message.chat.id
     data = query.data
-    brend = data.split('_')[-1]
+    brand = data.split('_')[-1]
 
-    products = db.get_phone_list(brend)
+    products = db.get_phone_list(brand)
     # create keyboard
     keyboard = [[], []]
     phone_text = f"1-10/{len(products)}\n\n"
@@ -62,7 +63,7 @@ def get_product(update: Update, context: CallbackContext) -> None:
         # create button
         btn = InlineKeyboardButton(
             text = str(i),
-            callback_data=f"product_{brend}_{phone.doc_id}"
+            callback_data=f"product_{brand}_{phone.doc_id}"
         )
         if i < 6:
             # 1 2 3 4 5
@@ -72,7 +73,7 @@ def get_product(update: Update, context: CallbackContext) -> None:
             keyboard[1].append(btn)
     
     # btn1 = InlineKeyboardButton(text="⬅️", callback_data=f'nextleft_{brend}_{pr_range}')
-    btn2 = InlineKeyboardButton(text="➡️", callback_data=f'nextright_{brend}_{pr_range}')
+    btn2 = InlineKeyboardButton(text="➡️", callback_data=f'nextright_{brand}_{pr_range}')
     keyboard.append([btn2])
 
     btn3 = InlineKeyboardButton(text="Brend", callback_data="view_product_data")
@@ -84,10 +85,10 @@ def get_product(update: Update, context: CallbackContext) -> None:
 def next_product(update, context):
     query = update.callback_query
     data = query.data.split('_')
-    text, brend, pr_range = data
+    text, brand, pr_range = data
 
     pr_range = int(pr_range)
-    products = db.get_phone_list(brend)
+    products = db.get_phone_list(brand)
 
     if len(products) < pr_range:
         pr_range = 0
@@ -101,7 +102,7 @@ def next_product(update, context):
         # create button
         btn = InlineKeyboardButton(
             text = str(i),
-            callback_data=f"product_{brend}_{phone.doc_id}"
+            callback_data=f"product_{brand}_{phone.doc_id}"
         )
         if i < 6:
             # 1 2 3 4 5
@@ -111,24 +112,21 @@ def next_product(update, context):
             keyboard[1].append(btn)
     pr_range += 10
     # btn1 = InlineKeyboardButton(text="⬅️", callback_data=f'nextleft_{brend}_{pr_range}')
-    btn2 = InlineKeyboardButton(text="➡️", callback_data=f'nextright_{brend}_{pr_range}')
+    btn2 = InlineKeyboardButton(text="➡️", callback_data=f'nextright_{brand}_{pr_range}')
     keyboard.append([btn2])
-
     btn3 = InlineKeyboardButton(text="Brend", callback_data="view_product_data")
     keyboard.append([btn3])
-
     reply_markup = InlineKeyboardMarkup(keyboard)
     query.edit_message_text(phone_text, reply_markup=reply_markup)
-
     query.answer("Next")
 
 def get_phone(update, context):
     bot  = context.bot
     query = update.callback_query
     data = query.data.split('_')
-    text, brend, doc_id = data
-
-    phone = db.getPhone(brend, doc_id)
+    text, brand, doc_id = data
+    # text
+    phone = db.getPhone(brand, int(doc_id))
     price = phone['price']
     ram = phone['RAM']
     memory = phone['memory']
@@ -136,22 +134,80 @@ def get_phone(update, context):
     color = phone['color']
     img = phone['img_url']
     text = f"📲{name}\n\n🎨{color}\n💾{ram}/{memory}\n💰{price}\n\n@telefonBozor"
-    btn1 = InlineKeyboardButton(text="Add Card", callback_data='add_card')
-    btn2 = InlineKeyboardButton(text="❌", callback_data='removeproduct')
+    # text
+    btn1 = InlineKeyboardButton(text="🛒 Add Card", callback_data=f'addcart_{brand}_{doc_id}')
+    btn2 = InlineKeyboardButton(text="❌", callback_data='removemessage')
     keyboard = InlineKeyboardMarkup([
         [btn1, btn2]
     ])
-
     bot.send_photo(chat_id=query.message.chat.id, photo=img, caption=text, reply_markup=keyboard)
-    
 
-def add_card(update, context):
+def addcart(update, context):
+    # bot = context.bot
     query = update.callback_query
-    query.answer("Done")
+    data = query.data.split('_')
+    callback, brand, doc_id = data
+    chat_id = query.message.chat.id
+    add_cart = cart.add(brand=brand, doc_id=doc_id, chat_id=chat_id)
+    btn1 = InlineKeyboardButton(text="🛒 Savatni bo'shatish", callback_data=f'clearcart_{brand}_{doc_id}')
+    btn2 = InlineKeyboardButton(text='❌', callback_data='removemessage')
+    keyboard = InlineKeyboardMarkup([[btn1, btn2]])
+    query.edit_message_reply_markup(reply_markup=keyboard)
+    query.answer("Qo'shildi✅")
 
-def remove_product(update, context):
+def clear_cart(update, context):
     query = update.callback_query
-    query.answer("Removed")
+    chat_id = query.message.chat.id
+    data = query.data.split('_')
+    callback, brand, doc_id = data
+    clear_cart = cart.remove(chat_id=chat_id)
+    btn1 = InlineKeyboardButton(text="🛒 Add Card", callback_data=f'addcart_{brand}_{doc_id}')
+    btn2 = InlineKeyboardButton(text="❌", callback_data="removemessage")
+    keyboard = InlineKeyboardMarkup([[btn1, btn2]])
+    query.edit_message_reply_markup(reply_markup=keyboard)
+    query.answer("🛒 Cart Is Empty Now")
+
+def remove_message(update, context):
+    query = update.callback_query
+    bot = context.bot
+    chat_id = query.message.chat.id
+    bot.delete_message(chat_id=chat_id, message_id=query.message.message_id)
+    query.answer('deleted')
+
+def view_cart(update, context):
+    bot = context.bot
+    query = update.callback_query
+    chat_id = query.message.chat.id
+    view = cart.get_cart(chat_id=chat_id)
+    total = 0
+
+    text = '1'
+    for i in view:
+        view_cart = cart.get_cart(chat_id=chat_id)
+        brand = view_cart[0]['brand']
+        doc_id = view_cart[0]['doc_id']
+        chat_id2 = view_cart[0]['chat_id']
+        phone = db.getPhone(brand=brand, idx=int(doc_id))
+        # text
+        brand = phone['company']
+        name = phone['name']
+        ram = phone['RAM']
+        memory = phone['memory']
+        price = phone['price']
+        total = + price
+        text + f'\nSiz tanlagan maxsulotlar quyidagilar👇\n📱 {brand} — {name}\n💾 {ram}/{memory}\n💰 {price}'
+        print(total)
+    bot.send_message(chat_id, text)
+
+def contact_us(update, context):
+    bot = context.bot
+    chat_id = update.message.chat.id
+    btn1 = InlineKeyboardButton(text="Phone Number", callback_data="phone_number")
+    btn2 = InlineKeyboardButton(text="Adress", callback_data="adress")
+    btn3 = InlineKeyboardButton(text="Location", callback_data="location")
+    btn4 = InlineKeyboardButton(text="Email", callback_data="email")
+    keybpoard = InlineKeyboardMarkup([[btn1, btn2], [btn3, btn4]])
+
 
 updater = Updater(token=TOKEN)
 dp = updater.dispatcher
@@ -161,7 +217,10 @@ dp.add_handler(CallbackQueryHandler(menu, pattern="bosh_menu"))
 dp.add_handler(CallbackQueryHandler(get_product, pattern="brend"))
 dp.add_handler(CallbackQueryHandler(next_product, pattern="next"))
 dp.add_handler(CallbackQueryHandler(get_phone, pattern="product"))
-dp.add_handler(CallbackQueryHandler(add_card, pattern="add_card"))
-dp.add_handler(CallbackQueryHandler(remove_product, pattern="removeproduct"))
+dp.add_handler(CallbackQueryHandler(addcart, pattern="addcart"))
+dp.add_handler(CallbackQueryHandler(clear_cart, pattern="clearcart"))
+dp.add_handler(CallbackQueryHandler(remove_message, pattern="removemessage"))
+dp.add_handler(CallbackQueryHandler(view_cart, pattern="view_cart_data"))
+dp.add_handler(CallbackQueryHandler(contact_us, pattern="contact_us_data"))
 updater.start_polling()
 updater.idle()

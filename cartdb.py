@@ -9,7 +9,6 @@ class Cart:
     def add(self, brand, doc_id, chat_id):
         """
         add card
-
         data = {
             'brand':brand,
             'doc_id': doc_id,
