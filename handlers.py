@@ -1,9 +1,9 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto
 from telegram.ext import Updater, CommandHandler, CallbackContext
 from cartdb import Cart
-cart = Cart('cartdb.json')
+cart = Cart('SmartphoneBot/cartdb.json')
 from db import DB
-db = DB('db.json')
+db = DB('SmartphoneBot/db.json')
 
 def start(update: Update, context: CallbackContext) -> None:
     bot = context.bot
