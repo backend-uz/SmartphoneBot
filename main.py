@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import Dispatcher, CommandHandler, CallbackQueryHandler
 import telegram
 from handlers import start, menu, view_products, get_product, next_product,  get_phone, addcart, clear_cart, remove_message, view_cart, contact_us
-TOKEN = "5068535219:AAGpTjbeJuI4k7Y_suzILFEQqJHwgT6ZhM8"
+TOKEN = "5068535219:AAGjGSqbhPQZqI2YKFYbXzMuE1csb1LCdlo"
 
 bot = telegram.Bot(TOKEN)
 

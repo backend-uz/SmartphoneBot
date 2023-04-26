@@ -1,7 +1,7 @@
 import telegram
 
-TOKEN="5068535219:AAGpTjbeJuI4k7Y_suzILFEQqJHwgT6ZhM8"
-url = "https://bacefap.pythonanywhere.com/webhook"
+TOKEN="5068535219:AAGjGSqbhPQZqI2YKFYbXzMuE1csb1LCdlo"
+url = "https://lorotar.pythonanywhere.com/webhook"
 bot = telegram.Bot(TOKEN)
 
 # print(bot.delete_webhook())
