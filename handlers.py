@@ -27,14 +27,10 @@ def menu(update: Update, context: CallbackContext) -> None:
 
 def view_products(update: Update, context: CallbackContext)-> None:
     query = update.callback_query
-
     brends = db.get_tables()
     keyboard = []
     for brend in brends:
-        btn = InlineKeyboardButton(
-            text = brend.capitalize(),
-            callback_data=f"brend_{brend}"
-        )
+        btn = InlineKeyboardButton(text = brend.capitalize(),callback_data=f"brend_{brend}")
         keyboard.append([btn])
     btn1 = InlineKeyboardButton(text="🏘 Bosh Menu", callback_data="bosh_menu")
     keyboard.append([btn1])
@@ -42,15 +38,15 @@ def view_products(update: Update, context: CallbackContext)-> None:
     keyboard = InlineKeyboardMarkup(keyboard)
     query.edit_message_text("Quyidagi brandlardan birini tanlang!", reply_markup=keyboard)
 
+
 def get_product(update: Update, context: CallbackContext) -> None:
     bot = context.bot
     query = update.callback_query
-
     chat_id = query.message.chat.id
     data = query.data
     brand = data.split('_')[-1]
-
     products = db.get_phone_list(brand)
+    print(products)
     # create keyboard
     keyboard = [[], []]
     phone_text = f"1-10/{len(products)}\n\n"
@@ -59,10 +55,8 @@ def get_product(update: Update, context: CallbackContext) -> None:
     for i, phone in enumerate(products[:pr_range], 1):
         phone_text += f"{i}. {phone['name']} {phone['memory']}\n"
         # create button
-        btn = InlineKeyboardButton(
-            text = str(i),
-            callback_data=f"product_{brand}_{phone.doc_id}"
-        )
+        
+        btn = InlineKeyboardButton(text = str(i), callback_data=f"product_{brand}_{phone.doc_id}")
         if i < 6:
             # 1 2 3 4 5
             keyboard[0].append(btn)
