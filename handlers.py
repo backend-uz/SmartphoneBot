@@ -56,7 +56,7 @@ def get_product(update: Update, context: CallbackContext) -> None:
         phone_text += f"{i}. {phone['name']} {phone['memory']}\n"
         # create button
         
-        btn = InlineKeyboardButton(text = str(i), callback_data=f"product_{brand}_{phone.name}")
+        btn = InlineKeyboardButton(text = str(i), callback_data=f"product_{brand}_{phone}")
         if i < 6:
             # 1 2 3 4 5
             keyboard[0].append(btn)
