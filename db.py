@@ -22,7 +22,7 @@ class DB:
             dict
         """
         response = requests.get(self.base_url + "/smartphone/" + brand + "/" + str(idx))
-        return response.json()
+        return list(response.json())
 
     def get_phone_list(self,brand):
         """
